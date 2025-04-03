@@ -18,5 +18,22 @@ def translations():
         return jsonify({"status": "success", "message": "Translation data received"}), 200
     return jsonify({"status": "success", "message": "Translation data endpoint"}), 200
 
+# ✅ ADD MISSING ROUTES
+@app.route("/api/users/-/")
+def users():
+    return jsonify({"status": "success", "users": []})  # Placeholder response
+
+@app.route("/api/pagesize")
+def pagesize():
+    return jsonify({"status": "success", "pagesize": 10})  # Placeholder value
+
+@app.route("/api/pages")
+def pages():
+    return jsonify({"status": "success", "pages": []})  # Placeholder response
+
+@app.route("/api/roles")
+def roles():
+    return jsonify({"status": "success", "roles": ["admin", "editor", "viewer"]})  # Example roles
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000)
