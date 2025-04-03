@@ -17,6 +17,7 @@ if not os.path.exists(DATABASE_DIR):
         print(f"Created directory: {DATABASE_DIR}")  # Log the creation
     except OSError as e:
         print(f"Error creating directory {DATABASE_DIR}: {e}")  # Log any errors
+
 # Initialize database connection
 def get_db_connection():
     conn = sqlite3.connect(DATABASE_URL)
@@ -28,7 +29,6 @@ if not os.path.exists(DATABASE_URL):
     conn = sqlite3.connect(DATABASE_URL)
     conn.close()
 
-
 # Error Handling
 @app.teardown_appcontext
 def close_db_connection(exception=None):
@@ -36,17 +36,14 @@ def close_db_connection(exception=None):
     if db is not None:
         db.close()
 
-
 # API Endpoints
 @app.route("/")
 def home():
     return "GrampsWeb API is running!"
 
-
 @app.route("/api/metadata/")
 def metadata():
     return jsonify({"status": "success", "message": "API metadata available"})
-
 
 @app.route("/api/translations/en", methods=["GET", "POST"])
 def translations():
@@ -54,21 +51,17 @@ def translations():
         return jsonify({"status": "success", "message": "Translation data received"}), 200
     return jsonify({"status": "success", "message": "Translation data endpoint"}), 200
 
-
 @app.route("/api/events/")
 def events():
     return jsonify({"status": "success", "events": []})
-
 
 @app.route("/api/search/")
 def search():
     return jsonify({"status": "success", "results": []})
 
-
 @app.route("/api/sources/")
 def sources():
     return jsonify({"status": "success", "sources": []})
-
 
 @app.route("/api/users/", methods=['GET', 'POST'])
 def api_users():
@@ -96,8 +89,7 @@ def api_users():
         conn.close()
         return jsonify({'error': 'Method not allowed'}), 405
 
-
-@app.route("/api/setup/")
+@app.route("/api/setup/", methods=["POST"])
 def setup_db():
     try:
         conn = get_db_connection()
@@ -113,7 +105,6 @@ def setup_db():
         return jsonify({"message": "Database initialized successfully"}), 200
     except sqlite3.Error as e:
         return jsonify({"error": "Database initialization failed", "details": str(e)}), 500
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000)
