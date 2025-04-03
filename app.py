@@ -7,19 +7,26 @@ app = Flask(__name__)
 CORS(app)
 
 # Database Configuration
-DATABASE_URL = os.environ.get("USER_DB_URI", "users.db")
+DATABASE_URL = os.environ.get("USER_DB_URI", "/app/data/users.sqlite")
+DATABASE_DIR = os.path.dirname(DATABASE_URL)  # Extract directory
+
+# Create Database Directory (if it doesn't exist)
+if not os.path.exists(DATABASE_DIR):
+    try:
+        os.makedirs(DATABASE_DIR, exist_ok=True)  # Create directory, ignore if exists
+        print(f"Created directory: {DATABASE_DIR}")  # Log the creation
+    except OSError as e:
+        print(f"Error creating directory {DATABASE_DIR}: {e}")  # Log any errors
+# Initialize database connection
+def get_db_connection():
+    conn = sqlite3.connect(DATABASE_URL)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 # Ensure the database file exists
 if not os.path.exists(DATABASE_URL):
     conn = sqlite3.connect(DATABASE_URL)
     conn.close()
-
-
-# Database Connection
-def get_db_connection():
-    conn = sqlite3.connect(DATABASE_URL)
-    conn.row_factory = sqlite3.Row
-    return conn
 
 
 # Error Handling
@@ -67,9 +74,12 @@ def sources():
 def api_users():
     conn = get_db_connection()
     if request.method == 'GET':
-        users = conn.execute('SELECT * FROM users').fetchall()
-        conn.close()
-        return jsonify([dict(row) for row in users]), 200
+        try:
+            users = conn.execute('SELECT * FROM users').fetchall()
+            conn.close()
+            return jsonify([dict(row) for row in users]), 200
+        except Exception as e:
+            return jsonify({'error': 'Database error', 'details': str(e)}), 500
     elif request.method == 'POST':
         try:
             data = request.get_json()
