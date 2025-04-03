@@ -43,7 +43,40 @@ def home():
 
 @app.route("/api/metadata/")
 def metadata():
-    return jsonify({"status": "success", "message": "API metadata available"})
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Get database schema version (assuming PRAGMA user_version)
+        cursor.execute("PRAGMA user_version;")
+        db_schema_version = cursor.fetchone()[0]
+
+        # Define API version
+        api_version = "0.1.0"  # You might want to store this elsewhere
+
+        # Check if any users exist
+        cursor.execute("SELECT COUNT(*) FROM users;")
+        user_count = cursor.fetchone()[0]
+        initial_setup_needed = user_count == 0
+
+        conn.close()
+
+        return jsonify({
+            "status": "success",
+            "message": "API metadata available",
+            "data": {
+                "database": {
+                    "schema_version": db_schema_version
+                },
+                "gramps_webapi": {
+                    "version": api_version
+                },
+                "initial_setup_needed": initial_setup_needed
+            }
+        })
+    except sqlite3.Error as e:
+        conn.close()
+        return jsonify({"status": "error", "message": "Error fetching metadata", "details": str(e)}), 500
 
 @app.route("/api/translations/en", methods=["GET", "POST"])
 def translations():
