@@ -1,0 +1,5 @@
+[
+  { "key": "welcome", "value": "Welcome to Gramps.js" },
+  { "key": "setup", "value": "Setup Wizard" },
+  { "key": "next", "value": "Next" }
+]
