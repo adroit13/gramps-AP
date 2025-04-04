@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import json  # Import the json module
 from flask import Flask, jsonify, request, g
 from flask_cors import CORS
 
@@ -82,7 +83,16 @@ def metadata():
 def translations():
     if request.method == "POST":
         return jsonify({"status": "success", "message": "Translation data received"}), 200
-    return jsonify({"status": "success", "message": "Translation data endpoint"}), 200
+    else:  # GET request
+        try:
+            # Load translation data from a JSON file (or database)
+            with open("translations_en.json", "r") as f:
+                translation_data = json.load(f)
+            return jsonify(translation_data), 200
+        except FileNotFoundError:
+            return jsonify({"status": "error", "message": "Translation file not found"}), 404
+        except Exception as e:
+            return jsonify({"status": "error", "message": "Error loading translations", "details": str(e)}), 500
 
 @app.route("/api/events/")
 def events():
